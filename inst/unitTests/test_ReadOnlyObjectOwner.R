@@ -51,29 +51,37 @@ unitTestBracketAccessor <-
   function()
 {
   own <- getRefClass("rObjOwn")$new()
-  own$objects$foo <- "boo"
-  own$objects$bar <- "goo"
-  own$objects$coo <- "zoo"
   checkTrue(all(names(own[]) == c("cacheDir", "files", "objects")))
   checkTrue(all(names(own[NULL]) == c("cacheDir", "files", "objects")))
   
   checkTrue(all(names(own[c("objects", "files")]) == c("objects", "files")))
   checkEquals(names(own[1]), "cacheDir")
   checkTrue(all(names(own[c(2,1)]) == c("files", "cacheDir")))
+  checkTrue(all(names(own[-3]) == c("cacheDir","files")))
 }
 
 unitTestDoubleBracketAccessor <-
   function()
 {
   own <- getRefClass("rObjOwn")$new()
-  own$objects$foo <- "boo"
-  own$objects$bar <- "goo"
-  own$objects$coo <- "zoo"
+  own$objects$foo <- "bar"
+  own$objects$goo <- "zoo"
   
   own$cacheDir <- "/foo/bar"
+  own$files <- "aFile"
   
   ## this test has a dependency on the behavior of Enhanced Environment
-  checkTrue(all(names(own[['objects']]) == c("bar", "coo", "foo")))
+  checkTrue(all(names(own[['objects']]) == c("foo", "goo")))
+  checkEquals(own[[2]], "aFile")
   checkEquals(own[['cacheDir']], "/foo/bar")
+  
+  checkException(own[[-1]])
+}
+
+unitTestAddObject <-
+  function()
+{
+  own <- getRefClass("rObjOwn")$new()
+  checkException(addObject(own, "foo", "goo"))
 }
 

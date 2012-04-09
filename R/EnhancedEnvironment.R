@@ -3,13 +3,6 @@
 # Author: furia
 ###############################################################################
 
-setClass(
-  Class = "EnhancedEnvironment",
-  representation = representation(
-    env = "environment"
-  )
-)
-
 setMethod(
   f = "names",
   signature = "EnhancedEnvironment",
