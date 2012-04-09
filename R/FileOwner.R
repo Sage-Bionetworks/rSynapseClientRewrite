@@ -4,12 +4,15 @@
 ###############################################################################
 
 setRefClass(
-  "WritableFileOwner",
-  contains = c("ReadOnlyFileOwner", "VIRTUAL"),
+  "FileOwner",
+  contains = c("BaseObject", "VIRTUAL"),
+  fields = list(
+    fileCache = "FileCache"
+  ),
   methods = list(
     initialize = function(){
-      .self$initFields(cacheDir=tempfile())
-      dir.create(.self$cacheDir)
+      .self$initFields(fileCache = new("FileCache"))
     }
   )
 )
+

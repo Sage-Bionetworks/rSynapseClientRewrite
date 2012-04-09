@@ -11,7 +11,7 @@
   suppressWarnings(
       setRefClass(
           "wObjOwn",
-          contains = "WritableObjectOwner",
+          contains = "CachingObjectOwner",
           where = env
       ) 
   )

@@ -3,38 +3,12 @@
 # Author: furia
 ###############################################################################
 
-setRefClass(
-  Class = "WritableObjectOwner",
-  contains = c("ReadOnlyObjectOwner", "WritableFileOwner", "VIRTUAL"),
-  methods = list(
-    addObject = function(object, name, unlist = FALSE){
-      if(missing(name) && class(object) == "list")
-        addObject(.self, object, name, unlist)
-    }
-  )
-)
-
-## general purpose function for adding objects and caching to file
-.doAddObjectWithCache <-
-  function(owner, object, name)
-{
-  owner$objects[[name]] <- object
-  tryCatch(
-    .cacheObject(owner, name),
-    error = function(e){
-      deleteObject(owner, name)
-      stop(e)
-    }
-  )
-  owner
-}
-
 ####
 # Methods for adding general objects
 ####
 setMethod(
   f = "addObject",
-  signature = signature("WritableObjectOwner", "ANY", "character", "missing"),
+  signature = signature("CachingObjectOwner", "ANY", "character", "missing"),
   definition = function(owner, object, name){
     invisible(.doAddObjectWithCache(owner, object, name))
   }
@@ -42,7 +16,7 @@ setMethod(
 
 setMethod(
   f = "addObject",
-  signature = signature("WritableObjectOwner", "ANY", "missing", "missing"),
+  signature = signature("CachingObjectOwner", "ANY", "missing", "missing"),
   definition = function(owner, object){
     name = deparse(substitute(object, env=parent.frame()))
     name <- gsub("\\\"", "", name)
@@ -55,7 +29,7 @@ setMethod(
 ###
 setMethod(
   f = "addObject",
-  signature = signature("WritableObjectOwner", "list", "character", "logical"),
+  signature = signature("CachingObjectOwner", "list", "character", "logical"),
   definition = function(owner, object, name, unlist){
     if(unlist)
       stop("cannot specify the object name when unlisting")
@@ -66,7 +40,7 @@ setMethod(
 
 setMethod(
   f = "addObject",
-  signature = signature("WritableObjectOwner", "list", "missing", "logical"),
+  signature = signature("CachingObjectOwner", "list", "missing", "logical"),
   definition = function(owner, object, unlist){
     if(unlist)
       return(addObject(owner, object))
@@ -79,7 +53,7 @@ setMethod(
 
 setMethod(
   f = "addObject",
-  signature = signature("WritableObjectOwner", "list", "missing", "missing"),
+  signature = signature("CachingObjectOwner", "list", "missing", "missing"),
   definition = function(owner, object){
     if(any(names(object) == "") || is.null(names(object)))
       stop("all elements of the list must be named")
@@ -97,7 +71,7 @@ setMethod(
 ####
 setMethod(
   f = "addObject",
-  signature = signature("WritableObjectOwner", "data.frame", "missing", "missing"),
+  signature = signature("CachingObjectOwner", "data.frame", "missing", "missing"),
   definition = function(owner, object){
     name = deparse(substitute(object, env=parent.frame()))
     name <- gsub("\\\"", "", name)
@@ -107,7 +81,7 @@ setMethod(
 
 setMethod(
   f = "addObject",
-  signature = signature("WritableObjectOwner", "data.frame", "character", "missing"),
+  signature = signature("CachingObjectOwner", "data.frame", "character", "missing"),
   definition = function(owner, object, name){
     invisible(.doAddObjectWithCache(owner, object, name))
   }
@@ -115,7 +89,7 @@ setMethod(
 
 setMethod(
   f = "deleteObject",
-  signature = signature("WritableObjectOwner", "character"),
+  signature = signature("CachingObjectOwner", "character"),
   definition = function(owner, which){
     rm(list=which, envir=as.environment(owner$objects))
     tryCatch(
@@ -133,7 +107,7 @@ setMethod(
 
 setMethod(
   f = "renameObject",
-  signature = signature("WritableObjectOwner", "character", "character"),
+  signature = signature("CachingObjectOwner", "character", "character"),
   definition = function(owner, which, name){
     if(length(which) != length(name))
       stop("Must supply the same number of names as objects")
